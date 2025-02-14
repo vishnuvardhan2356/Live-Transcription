@@ -1,5 +1,3 @@
-os
-time
 pyaudio
 azure-cognitiveservices-speech
 streamlit
