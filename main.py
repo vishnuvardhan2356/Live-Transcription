@@ -7,8 +7,8 @@ import threading
 from datetime import datetime
 
 # Initialize Azure service
-SPEECH_KEY = st.secrets["AZURE_SPEECH_KEY"]
-SPEECH_REGION = st.secrets["AZURE_REGION"]
+SPEECH_KEY = "6CVqzWbDeAHx3XIWQ1amYsNFAbPX8VZUQ4mJ66xcuztqhgGbydqsJQQJ99AKACGhslBXJ3w3AAAYACOGJLNq"
+SPEECH_REGION = "centralindia"
 
 
 def main():
@@ -84,7 +84,7 @@ def main():
     # Tab 1: Upload File
     with tab1:
         st.header("Upload Audio File")
-        uploaded_file = st.file_uploader("Choose an audio file", type=['wav', 'mp3', 'm4a'])
+        uploaded_file = st.file_uploader("Choose an audio file", type=['wav'])
         
         if uploaded_file is not None:
             st.audio(uploaded_file)
@@ -105,11 +105,17 @@ def main():
                     
                     complete_transcript = ""
                     interim_transcript = ""
-                    
+                    start_time = time.time()
+                    initial_response_time = None
+
                     while True:
                         if not message_queue.empty():
                             msg_type, text = message_queue.get()
                             if text.strip():
+                                if initial_response_time is None:
+                                    initial_response_time = time.time() - start_time
+                                    st.write(f"**TTFB:** {initial_response_time:.2f} seconds")
+
                                 if msg_type == 'recognizing':
                                     interim_transcript = text
                                     display_text = complete_transcript + "\n" + interim_transcript if complete_transcript else interim_transcript
@@ -152,6 +158,7 @@ def main():
                 st.session_state.recording = True
                 st.session_state.azure_transcript = ""  # Clear previous transcript
                 st.session_state.recorder.start_recording()
+                st.session_state.start_time = time.time()
                 st.rerun()
         
         with col2:
@@ -172,11 +179,18 @@ def main():
             
             if st.session_state.recording:
                 message_queue, recognizer = st.session_state.azure_service.recognize_from_microphone()
-                
+                start_time = st.session_state.start_time
+                initial_response_time = None
+
                 while st.session_state.recording:
                     if not message_queue.empty():
                         msg_type, text = message_queue.get()
                         if text.strip():
+
+                            if initial_response_time is None:
+                                initial_response_time = time.time() - start_time
+                                st.write(f"**TTFB:** {initial_response_time:.2f} seconds")
+
                             if msg_type == 'recognizing':
                                 st.session_state.interim_transcript = text
                                 display_text = st.session_state.azure_transcript + "\n" + st.session_state.interim_transcript if st.session_state.azure_transcript else st.session_state.interim_transcript
@@ -204,3 +218,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
