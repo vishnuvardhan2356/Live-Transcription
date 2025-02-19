@@ -7,8 +7,8 @@ import threading
 from datetime import datetime
 
 # Initialize Azure service
-SPEECH_KEY = "6CVqzWbDeAHx3XIWQ1amYsNFAbPX8VZUQ4mJ66xcuztqhgGbydqsJQQJ99AKACGhslBXJ3w3AAAYACOGJLNq"
-SPEECH_REGION = "centralindia"
+SPEECH_KEY = "**"
+SPEECH_REGION = "**"
 
 
 def main():
